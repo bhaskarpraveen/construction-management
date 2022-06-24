@@ -5,6 +5,7 @@ const cors = require('cors');
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 
+
 //import routes
 const userRoutes = require('./routes/user_routes');
 
@@ -31,4 +32,4 @@ app.use('/users',userRoutes);
 
 app.listen(`${PORT}`,()=>{
     console.log(`Listening at port: ${PORT}`);
-})
+});
