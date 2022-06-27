@@ -27,21 +27,21 @@ router.post('/register',async (request,response)=>{
                 await pool.query("INSERT INTO otp(otp,user_id) VALUES($1,$2)",[otp,user_record.rows[0].id]);
                 let res = await generateOtp("+91"+phone_number,otp);
                 if(res['status']){
-                    return response.status(200).json({"message":"User successfully registered, OTP sent"});
+                    return response.status(200).json({"message":"User successfully registered, OTP sent","status":true,"otpStatus":true});
                 }else{
-                    return response.status(200).json({"message":"User successfully registered, OTP failed"});
+                    return response.status(200).json({"message":"User successfully registered, OTP failed","status":true,"otpStatus":false});
                 }
                 
             }else{
-                return response.status(400).json({"message":"User with same email or phone number already exists"});
+                return response.status(400).json({"message":"User with same email or phone number already exists","status":false});
             }
             
         }else{
-            return response.status(400).json({"message":"Please enter all details"});
+            return response.status(400).json({"message":"Please enter all details","status":false});
         }
         
     } catch (error) {
-        return response.status(501).json({"message":error.message})
+        return response.status(501).json({"message":error.message,"status":false})
     }
 });
 router.post('/login',async (request,response)=>{
@@ -54,26 +54,26 @@ router.post('/login',async (request,response)=>{
                 if(check){
                     if(record.rows[0].verified){
                         if(record.rows[0].approved){
-                            let token =  await jwt.sign({phone_number:phone_number},TOKEN,{expiresIn:'3h'});
-                            return response.status(200).json({"message":"Logged in successfully","token":token});
+                            let token =  await jwt.sign({phone_number:phone_number,role:record.rows[0].role_id,email:record.rows[0].email},TOKEN,{expiresIn:'3h'});
+                            return response.status(200).json({"message":"Logged in successfully","token":token,"status":true,"otpStatus":true});
                         }else{
-                            return response.status(401).json({"message":"account not approved by the admin"});
+                            return response.status(401).json({"message":"account not approved by the admin","status":false});
                         }
                     }else{
-                        return response.status(401).json({"message":"Phone number not verified yet"});
+                        return response.status(401).json({"message":"Phone number not verified yet","status":true,"otpStatus":false});
                     }
                     
                 }else{
-                    return response.status(401).json({"message":"Invalid Credentials"});
+                    return response.status(401).json({"message":"Invalid Credentials","status":false});
                 }
             }else{
-                return response.status(401).json({"message":"No record found"});
+                return response.status(401).json({"message":"No record found","status":false});
             }
         }else{
-            return response.status(400).json({"message":"Please enter all details"});
+            return response.status(400).json({"message":"Please enter all details","status":false});
         }
     } catch (error) {
-        return response.status(501).json({"message":error.message});
+        return response.status(501).json({"message":error.message,"status":false});
     }
 });
 router.post('/verifyotp',async(request,response)=>{
@@ -84,17 +84,45 @@ router.post('/verifyotp',async(request,response)=>{
             if(record.rows.length>0){
                 await pool.query("UPDATE users SET verified = TRUE WHERE phone_number = $1",[phone_number]);
                 await pool.query("DELETE FROM otp WHERE user_id=$1",[record.rows[0].id]);
-                return response.status(200).json({"message":"Phone Number Successfully verified"});
+                return response.status(200).json({"message":"Phone Number Successfully verified","status":true});
             }else{
-                return response.status(500).json({"message":"Invalid otp"});
+                return response.status(500).json({"message":"Invalid otp","status":false});
             }
             
         }else{
-            return response.status(400).json({"message":"Please enter all details"});
+            return response.status(400).json({"message":"Please enter all details","status":false});
         }
     } catch (error) {
-        return response.status(500).json({'message':error.message});
+        return response.status(500).json({'message':error.message,"status":false});
         
+    }
+});
+router.post('/resendotp',async(request,response)=>{
+    try {
+        let {phone_number} = request.body;
+        if(phone_number){
+            let otp = Math.floor(100000 + Math.random() * 900000);
+            let user_record = await pool.query("SELECT ID FROM users WHERE phone_number = $1",[phone_number]);
+            if(user_record){
+                await pool.query("DELETE FROM otp where user_id=$1",[user_record.rows[0].id]);
+                await pool.query("INSERT INTO otp(otp,user_id) VALUES($1,$2)",[otp,user_record.rows[0].id]);
+                let res = await generateOtp("+91"+phone_number,otp);
+                if(res['status']){
+                    return response.status(200).json({"message":"OTP sent","status":true});
+                }else{
+                    return response.status(200).json({"message":"OTP failed","status":false});
+                }
+    
+            }else{
+                return response.status(500).json({"message":"phone number not found","status":false})
+            }
+          
+        }else{
+            return response.status(400).json({"message":"Please enter a valid phone number","status":false});
+        }
+        
+    } catch (error) {
+        return response.status(500).json({"message":error.message,"status":false})
     }
 })
 router.get('/',async (req,res)=>{

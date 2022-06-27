@@ -14,9 +14,6 @@ CREATE TABLE users(
     approved BOOLEAN DEFAULT FALSE NOT NULL,
     role_id INTEGER NOT NULL,
     password VARCHAR(100) NOT NULL
-    -- CONSTRAINT fk_users_roles
-    -- FOREIGN KEY (role_id)
-    -- REFERENCES roles(ID)
 );
 
 -- create roles table
