@@ -7,7 +7,7 @@ module.exports ={
             const {token} = request.headers;
             jwt.verify(token,TOKEN,function(err,data){
                 if(err){
-                    return response.status(400).json({"message":'Unauthorizeed request'});
+                    return response.status(401).json({"message":'Unauthorized request'});
                 }
                 if(data){
                     request.tokenData = data;
@@ -16,7 +16,7 @@ module.exports ={
             })
 
         } catch (error) {
-            return response.status(500).json({"message":error.message})
+            return response.status(501).json({"message":error.message})
         }
     }
 }
