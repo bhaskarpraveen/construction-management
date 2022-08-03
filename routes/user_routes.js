@@ -219,7 +219,16 @@ router.get('/getuserdetailsbytoken',verifyToken,async (request,response)=>{
     } catch (error) {
         return response.status(501).json({'message':error.message,'status':false});   
     }
-})
+});
+
+router.post('/fileupload',function(request,response){
+    try {
+        let {file} = request.files;
+        return response.status(200).json(file)
+    } catch (error) {
+        return response.status(501).json({'message':error.message,'status':false});
+    }
+});
 
 router.get('/',async (req,res)=>{
     try {

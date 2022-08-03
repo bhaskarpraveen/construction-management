@@ -1,5 +1,15 @@
 -- sudo su - postgres
 -- psql -U postgres
+
+---- using docker for postgres --- 
+
+-- docker volume create postgresvolume
+-- docker pull postgres
+-- docker run --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d --mount source=postgresvolume,target=/var/lib/postgresql/data postgres
+-- docker exec -it postgres bash
+-- psql -U postgres
+
+--------------
 CREATE DATABASE construction_api;
 -- created a database
 

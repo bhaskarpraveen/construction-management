@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const app = express();
 const cors = require('cors');
+const fileupload = require('express-fileupload');
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 
@@ -24,7 +25,13 @@ const corsOpts={
 //middlewares
 app.use(express.json())
 app.use(cors(corsOpts))
-
+app.use(fileupload({
+    createParentPath:true,
+    limits:{
+        fileSize:50*1024*1024 //50 MB
+    },
+    abortOnLimit:true
+}))
 
 
 //route middlewares
